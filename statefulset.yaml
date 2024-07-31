@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pg-in-ubi8
+spec:
+  selector:
+    matchLabels:
+      app: pg-in-ubi8
+  serviceName: pg-in-ubi8-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pg-in-ubi8
+    spec:
+      containers:
+      - name: pg-in-ubi8
+        image: psql-in-ubi8:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: pg-in-ubi8-storage
+          mountPath: /var/lib/pgsql/data
+        command: ["/bin/sh", "-c"]
+        args: ["usr/pgsql-16/bin/initdb -D /var/lib/pgsql/data; /start.sh"]
+  volumeClaimTemplates:
+  - metadata:
+      name: pg-in-ubi8-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
